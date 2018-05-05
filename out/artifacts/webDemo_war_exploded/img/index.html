@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <!--<script src="/jquery/jquery-1.11.1.min.js"></script>-->
+    <script type="text/javascript" src="my.js"></script>
+    <title>毕设</title>
+</head>
+<body>
+
+<img id="bg" src="background.jpg" height="100%" width="100%">
+
+<div id="frame">
+    <img class="image" id="upload" src="upload.jpg"/>
+</div>
+
+<div id="btn">
+    <form id="target" method="post" action="/webDemo/UploadServlet" enctype="multipart/form-data">
+        <!--<input class="image" id="choose" backgroud="upload.jpg" type="file" name="image" accept=“image/*”-->
+        <!--change='upload()'>-->
+        <input class="image" id="choose" backgroud="upload.jpg" type="file" name="image" accept=“image/*"
+               onchange="form.submit()">
+        <!--<input type="submit" value="上传"/>-->
+    </form>
+</div>
+</body>
+</html>
