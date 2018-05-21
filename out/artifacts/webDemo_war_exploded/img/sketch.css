@@ -1,14 +1,21 @@
 html, body {
-  height: 100%;
+    height: 100%;
 }
 
 body {
-  margin: 0;
-  display: flex;
+    margin: 0;
+    display: flex;
 
-  /* This centers our sketch horizontally. */
-  justify-content: center;
+    /* This centers our sketch horizontally. */
+    justify-content: center;
 
-  /* This centers our sketch vertically. */
-  align-items: center;
+    /* This centers our sketch vertically. */
+    align-items: center;
+}
+
+#bg {
+    position: absolute;
+    z-index: -10;
+    overflow: hidden;
+    object-fit: fill;
 }

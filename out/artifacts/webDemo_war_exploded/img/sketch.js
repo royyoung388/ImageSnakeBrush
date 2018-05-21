@@ -3,7 +3,7 @@ var snBrush;
 var iters = 5;
 var curr;
 var fileName;
-var imgLength = 900;
+var imgLength = 800;
 
 function getImgName() {
     console.log("start get");
@@ -20,11 +20,11 @@ function getImgName() {
 // $(document).ready(function(){
 // });
 
+
 function loadImg() {
     img = loadImage("/webDemo/upload/" + fileName, function (img) {
         console.log("load image: " + fileName);
         img.resize(imgLength, imgLength);
-
         curr = fileName;
         background(30);
         snBrush = new SnakeBrush(random(width), random(height), 20, brushShape);

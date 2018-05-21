@@ -1,6 +1,12 @@
 package web;
 
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.imaging.jpeg.JpegProcessingException;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
 import org.apache.commons.fileupload.FileItem;
@@ -18,11 +24,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.logging.Logger;
 
 /**
  * Servlet implementation class UploadServlet
@@ -45,6 +51,8 @@ public class UploadServlet extends HttpServlet {
     //图片队列
     private Queue<File> imgQueue = new ConcurrentLinkedDeque<>();
     private String imgName = "0";
+
+    private int imgLength = 800;
 
     @Override
     public void init() throws ServletException {
@@ -150,15 +158,18 @@ public class UploadServlet extends HttpServlet {
 
                         int imageWidth = image.getWidth();
                         int imageHeight = image.getHeight();
-                        if ((float)900 / 900 != (float)imageWidth / imageHeight) {
+                        if ((float) imgLength / imgLength != (float) imageWidth / imageHeight) {
                             if (imageWidth > imageHeight) {
-                                builder.height(900);
+                                builder.height(imgLength);
                             } else {
-                                builder.width(900);
+                                builder.width(imgLength);
                             }
-                            builder = Thumbnails.of(builder.asBufferedImage()).sourceRegion(Positions.CENTER, 900, 900).size(900, 900);
+                            builder = Thumbnails.of(builder.asBufferedImage())
+                                    .rotate(rotateIOSImg(storeFile))
+                                    .sourceRegion(Positions.CENTER, imgLength, imgLength)
+                                    .size(imgLength, imgLength);
                         } else {
-                            builder.size(900, 900);
+                            builder.size(imgLength, imgLength);
                         }
                         builder.toFile(storeFile);
 
@@ -198,5 +209,48 @@ public class UploadServlet extends HttpServlet {
         response.setStatus(response.SC_MOVED_TEMPORARILY);
         response.setHeader("Location", site);
 //        request.getServletContext().getRequestDispatcher("/index.html").forward(request, response);
+    }
+
+    private int rotateIOSImg(File file) {
+
+        Metadata metadata;
+        int angel = 0;
+
+        try {
+            metadata = ImageMetadataReader.readMetadata(file);
+//            Directory directory = metadata.getDirectory(ExifDirectory.class);
+            Collection<ExifSubIFDDirectory> directory = metadata.getDirectoriesOfType(ExifSubIFDDirectory.class);
+
+            for (ExifSubIFDDirectory exif : directory) {
+                if (exif.containsTag(ExifSubIFDDirectory.TAG_ORIENTATION)) {
+                    // Exif信息中方向　　
+                    int orientation = exif.getInt(ExifSubIFDDirectory.TAG_ORIENTATION);
+                    // 原图片的方向信息
+                    if (6 == orientation) {
+                        //6逆时针旋转90
+                        angel = 90;
+                    } else if (3 == orientation) {
+                        //3旋转180
+                        angel = 180;
+                    } else if (8 == orientation) {
+                        //8顺时针旋转90
+                        angel = 270;
+                    }
+                    return angel;
+                }
+            }
+        } catch (JpegProcessingException e) {
+            e.printStackTrace();
+        } catch (MetadataException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ImageProcessingException e) {
+            e.printStackTrace();
+        }
+
+        context.log("图片旋转类型角度：" + angel);
+
+        return angel;
     }
 }
